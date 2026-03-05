@@ -1,2 +1,281 @@
+<!DOCTYPE html>
 
-<!DOCTYPE html> <html> <head> <meta charset="utf-8"> <title>Drive Mad – 250 Levels + Editor</title> <meta name="viewport" content="width=device-width,initial-scale=1"> <style> body{ margin:0; background:#111; color:white; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; } #game{ border:2px solid #444; margin-top:10px; } #panel{ margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; } button{ padding:6px 10px; cursor:pointer; } #levelSelect{ height:120px; overflow:auto; background:#222; padding:6px; border:1px solid #555; } .editor{ display:none; margin-top:10px; background:#222; padding:10px; } input{ margin:4px; } </style> </head> <body> <h2>Drive Mad – 250 Levels</h2> <canvas id="game" width="960" height="600"></canvas> <div id="panel"> <button onclick="toggleSelector()">Level Selector</button> <button onclick="toggleEditor()">Level Editor</button> </div> <div id="levelSelect"></div> <div id="editor" class="editor"> <h3>Create Custom Level</h3> X <input id="ex" type="number" value="10"> Y <input id="ey" type="number" value="0"> <button onclick="addRamp()">Add Ramp</button> <button onclick="addPlatform()">Add Platform</button> <button onclick="addGap()">Add Gap</button> <button onclick="exportLevel()">Export Level</button> </div> <script> /* ---------------------- Custom levels 201-250 ---------------------- */ const CUSTOM_LEVELS=[]; for(let i=201;i<=250;i++){ CUSTOM_LEVELS.push({ id:i, name:"Custom "+i, objects:[ {type:"start",x:0,y:0}, {type:"ramp",x:6,y:0,angle:20+(i%20)}, {type:"gap",x:12,width:4+(i%8)}, {type:"platform",x:18,y:2,length:6}, {type:"goal",x:30,y:0} ] }); } /* ---------------------- Level selector ---------------------- */ const selector=document.getElementById("levelSelect"); for(let i=1;i<=250;i++){ let b=document.createElement("button"); b.innerText=i; b.onclick=()=>loadLevel(i); selector.appendChild(b); } /* ---------------------- Toggle UI ---------------------- */ function toggleSelector(){ selector.style.display= selector.style.display==="block"?"none":"block"; } function toggleEditor(){ let e=document.getElementById("editor"); e.style.display= e.style.display==="block"?"none":"block"; } /* ---------------------- Level editor ---------------------- */ let editObjects=[]; function addRamp(){ editObjects.push({ type:"ramp", x:Number(ex.value), y:Number(ey.value), angle:30 }); } function addPlatform(){ editObjects.push({ type:"platform", x:Number(ex.value), y:Number(ey.value), length:6 }); } function addGap(){ editObjects.push({ type:"gap", x:Number(ex.value), width:6 }); } function exportLevel(){ let level={ id:999, objects:[ {type:"start",x:0,y:0}, ...editObjects, {type:"goal",x:30,y:0} ] }; alert(JSON.stringify(level,null,2)); } /* ---------------------- Engine loader ---------------------- */ var Module={ canvas:document.getElementById("game") }; let s1=document.createElement("script"); s1.src="https://cdn.jsdelivr.net/gh/genizy/dmad-poki/webapp/source_min.js"; document.body.appendChild(s1); let s2=document.createElement("script"); s2.src="https://cdn.jsdelivr.net/gh/genizy/dmad-poki/webapp/index.js"; document.body.appendChild(s2); /* ---------------------- Override level loader ---------------------- */ function loadLevel(id){ if(window.getLevel){ window.currentLevel=id; } } setTimeout(()=>{ if(window.getLevel){ const original=window.getLevel; window.getLevel=function(id){ if(id<=200){ return original(id); } return CUSTOM_LEVELS.find(l=>l.id===id); }; } window.TOTAL_LEVELS=250; },3000); </script> </body> </html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Drive Mad 250</title>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+background:#111;
+color:white;
+font-family:Arial;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+h2{
+margin:10px;
+}
+
+canvas{
+border:2px solid #444;
+}
+
+#controls{
+margin-top:10px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+button{
+padding:6px 10px;
+cursor:pointer;
+background:#333;
+color:white;
+border:none;
+}
+
+button:hover{
+background:#555;
+}
+
+#levelSelect{
+display:none;
+max-width:700px;
+flex-wrap:wrap;
+gap:4px;
+margin-top:10px;
+}
+
+#levelSelect button{
+width:40px;
+}
+
+#editor{
+display:none;
+margin-top:15px;
+background:#222;
+padding:10px;
+border:1px solid #555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Drive Mad – 250 Levels</h2>
+
+<canvas id="canvas" width="960" height="600"></canvas>
+
+<div id="controls">
+
+<button onclick="toggleLevels()">Level Select</button> <button onclick="toggleEditor()">Level Editor</button>
+
+</div>
+
+<div id="levelSelect"></div>
+
+<div id="editor">
+
+<h3>Level Editor</h3>
+
+X <input id="ex" type="number" value="10">
+Y <input id="ey" type="number" value="0">
+
+<br><br>
+
+<button onclick="addRamp()">Ramp</button> <button onclick="addPlatform()">Platform</button> <button onclick="addGap()">Gap</button>
+
+<br><br>
+
+<button onclick="exportLevel()">Export JSON</button>
+
+</div>
+
+<script>
+
+/* ---------------------------
+LEVEL SELECTOR
+--------------------------- */
+
+const levelBox=document.getElementById("levelSelect");
+
+for(let i=1;i<=250;i++){
+
+let b=document.createElement("button");
+
+b.textContent=i;
+
+b.onclick=()=>loadLevel(i);
+
+levelBox.appendChild(b);
+
+}
+
+function toggleLevels(){
+
+levelBox.style.display=
+levelBox.style.display==="flex"?"none":"flex";
+
+}
+
+/* ---------------------------
+LEVEL EDITOR
+--------------------------- */
+
+let editObjects=[];
+
+function toggleEditor(){
+
+let e=document.getElementById("editor");
+
+e.style.display=
+e.style.display==="block"?"none":"block";
+
+}
+
+function addRamp(){
+
+editObjects.push({
+type:"ramp",
+x:Number(ex.value),
+y:Number(ey.value),
+angle:30
+});
+
+}
+
+function addPlatform(){
+
+editObjects.push({
+type:"platform",
+x:Number(ex.value),
+y:Number(ey.value),
+length:6
+});
+
+}
+
+function addGap(){
+
+editObjects.push({
+type:"gap",
+x:Number(ex.value),
+width:6
+});
+
+}
+
+function exportLevel(){
+
+let level={
+id:999,
+objects:[
+{type:"start",x:0,y:0},
+...editObjects,
+{type:"goal",x:30,y:0}
+]
+};
+
+alert(JSON.stringify(level,null,2));
+
+}
+
+/* ---------------------------
+CUSTOM LEVELS 201–250
+--------------------------- */
+
+const CUSTOM_LEVELS=[];
+
+for(let i=201;i<=250;i++){
+
+CUSTOM_LEVELS.push({
+
+id:i,
+name:"Custom "+i,
+
+objects:[
+
+{type:"start",x:0,y:0},
+
+{type:"ramp",x:6,y:0,angle:20+(i%20)},
+
+{type:"gap",x:12,width:4+(i%8)},
+
+{type:"platform",x:18,y:2,length:6},
+
+{type:"goal",x:30,y:0}
+
+]
+
+});
+
+}
+
+/* ---------------------------
+LOAD GAME ENGINE
+--------------------------- */
+
+var Module={
+canvas:document.getElementById("canvas")
+};
+
+function loadScript(src){
+
+let s=document.createElement("script");
+
+s.src=src;
+
+document.body.appendChild(s);
+
+}
+
+loadScript("https://cdn.jsdelivr.net/gh/genizy/dmad-poki/webapp/source_min.js");
+loadScript("https://cdn.jsdelivr.net/gh/genizy/dmad-poki/webapp/index.js");
+
+/* ---------------------------
+LEVEL OVERRIDE
+--------------------------- */
+
+function loadLevel(id){
+
+window.currentLevel=id;
+
+}
+
+setTimeout(()=>{
+
+if(window.getLevel){
+
+const original=window.getLevel;
+
+window.getLevel=function(id){
+
+if(id<=200){
+return original(id);
+}
+
+return CUSTOM_LEVELS.find(l=>l.id===id);
+
+};
+
+}
+
+window.TOTAL_LEVELS=250;
+
+},3000);
+
+</script>
+
+</body>
+</html>
