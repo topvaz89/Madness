@@ -1,2 +1,0 @@
-# Manse.github.io
-cool
